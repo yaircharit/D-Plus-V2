@@ -1,0 +1,55 @@
+
+input{
+    border:none;
+    background-color: transparent;
+}
+
+li{
+    
+}
+
+button{
+    border-radius: 50px;
+}
+
+.delete-button{
+    background-color: maroon;
+    color: lightgray
+}
+
+.collection{
+    display: inline-flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    /* background-color: goldenrod; */
+    padding: 2em;
+}
+
+.collection-title{
+    border: none;
+    font-size: 2em;
+}
+
+.container{
+    margin: 1em;
+    width: fit-content;
+    font-size: 0.3em;
+    /* border-radius: 25px; */
+}
+
+.container-head{
+    background-color: darkgray;
+    padding: 0.5em;
+    border-bottom: rgb(97, 97, 97) 2px solid;
+    border-radius: 25px 25px 0 0;
+    /* width: max-content; */
+}
+
+.container-body{
+    background-color: lightgray;
+    border-radius: 0 0 25px 25px ;
+    margin: 0;
+    padding: 1em;
+    /* width: max-content; */
+}
+
