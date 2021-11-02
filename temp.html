@@ -40,9 +40,24 @@
             return el;
         }
 
+        class CollectionContainer{
+            constructor(json_colls = [{'New Collection': []}], HTML_element = 'collections'){
+                this.body = []
+                this.HTML = document.getElementById(HTML_element)
+
+                let coll;
+                for (let i in json_colls){
+                    let coll = new Collection(json_colls[i])
+                    this.body.push(coll)
+                    this.HTML.appendChild(coll.HTML.main)
+                }
+            }
+        }
+
         class Collection{
-            constructor(title = 'Empty Collection'){
-                this.title = title;
+            constructor(json_coll = {'New Collection': []}){
+                this.title = Object.keys(json_coll)[0];
+                json_coll = json_coll[this.title]
                 this.body = []
                 this.HTML = {}
                 this.HTML.main = createElement('div', {class: 'collection'})
@@ -50,26 +65,34 @@
                 this.HTML.head.main = createElement('div', {class: 'collection-head'})
                 this.HTML.head.title = createElement('input', {class: 'collection-title', value: this.title, disabled: true}, )
                 this.HTML.head['delete-button'] = createElement('button', {class: 'little-button delete-button'},'X' )
-                this.HTML.head.main.appendChild( this.HTML.head['delete-button'])
-                this.HTML.head.main.appendChild( this.HTML.head.title)
+
+                for (let name in this.HTML.head)
+                    if (name != 'main')
+                        this.HTML.head.main.appendChild( this.HTML.head[name])
+
                 this.HTML.main.appendChild(this.HTML.head.main)
 
                 this.HTML.body = createElement('div', {class: 'collection-body'})
                 this.HTML.main.appendChild(this.HTML.body)
-                this.addContainer('First Container')
-                collections_div.appendChild(this.HTML.main)
+
+                let json_cont;
+                for (let i in json_coll){
+                    json_cont = json_coll[i]
+                    this.add(json_cont)
+                }
             }
 
-            addContainer(title = 'Empty Container'){
-                let cont = new Container(title)
+            add(json_cont){
+                let cont = new Container(json_cont)
                 this.body.push(cont)
                 this.HTML.body.appendChild(cont.HTML.main)
             }
         }
 
         class Container{
-            constructor(title = 'Empty Container'){
-                this.title = title
+            constructor(json_cont = {'New Container': ''}){
+                this.title = Object.keys(json_cont)[0]
+                json_cont = json_cont[this.title]
                 this.body = []
                 this.HTML = {}
                 this.HTML.main = createElement('div', {class: 'container'})
@@ -77,29 +100,39 @@
                 this.HTML.head.main = createElement('div', {class: 'container-head'})
                 
                 this.HTML.head['delete-button'] = createElement('button', {class: 'little-button delete-button'},'X' )
-                this.HTML.head.main.appendChild( this.HTML.head['delete-button'])
                 this.HTML.head.title = createElement('input', {class: 'container-title', value: this.title, disabled: true}, )
-                this.HTML.head.main.appendChild( this.HTML.head.title)
+                
+                for (let name in this.HTML.head)
+                    if (name != 'main')
+                        this.HTML.head.main.appendChild( this.HTML.head[name])
                 
                 this.HTML.main.appendChild(this.HTML.head.main)
                 
                 this.HTML.body = createElement('ul', {class: 'container-body'})
                 this.HTML.main.appendChild(this.HTML.body)
 
-                this.addItem('First Item', 'URLURK')
+                let json_item;
+                for (let i in json_cont){
+                    json_item = json_cont[i]
+                    this.add(json_item)
+                }
             }
 
-            addItem(title = 'Empty Item', url = ''){
-                let item = new Item(title, url)
+            add(json_item = {'New Item': ['Empty URL']}){
+                let item = new Item(json_item)
                 this.body.push(item)
                 this.HTML.body.appendChild(item.HTML.main)
             }
         }
 
         class Item{
-            constructor(title = 'Empty Item', url = ''){
-                this.title = title
-                this.url = url
+            constructor(json_item = {'New Item': ['Empty URL']}){
+                console.log(json_item)
+                this.title = Object.keys(json_item)[0]
+                json_item = json_item[this.title]
+                if (!(json_item instanceof Array))
+                    json_item = [json_item]
+                this.url = json_item[0]
                 this.children = []
 
                 this.HTML = {}
@@ -107,29 +140,28 @@
                 
                 this.HTML.head = {}
                 this.HTML.head.main = createElement('div', {class: 'item-head'})
-
                 this.HTML.head['delete-button'] = createElement('button', {class: 'little-button delete-button'},'X' )
-                this.HTML.head.main.appendChild( this.HTML.head['delete-button'])
-
                 this.HTML.head.title = createElement('input', {class: 'item-title', value: this.title, disabled: true}, )
-                this.HTML.head.main.appendChild( this.HTML.head.title)
-                
                 this.HTML.head['expand-button'] = createElement('button', {class: 'little-button expand-button'},'V' )
-                this.HTML.head.main.appendChild( this.HTML.head['expand-button'])
+                for (let name in this.HTML.head)
+                    if (name != 'main')
+                        this.HTML.head.main.appendChild( this.HTML.head[name])
 
                 this.HTML.main.appendChild(this.HTML.head.main)
 
+                // Create item's HTML representation
                 this.HTML.body = createElement('ul', {class: 'item-body'})
-
                 this.HTML['url'] = createElement('input', {class: 'item-url', value: this.url, disabled: true}, )
                 this.HTML.body.appendChild( createElement('li',{class: 'item-content'},this.HTML['url'])  )
-                
                 this.HTML.main.appendChild(this.HTML.body)
             }
         }
 
         var reg = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g
-
+        var bookmarks = [{'Main Collection': [{'🌐Search Engines': [{'*🔎Google': 'https://www.google.com'}, {'🧷Bing': 'https://www.Bing.com'}]}, {'📢 Social Media': [{'💠Facebook': ['https://www.facebook.com', {"All of Facebook's apps": ''}, {'📸Instegram': 'https://www.instegram.com'}, {'✔️Whatsapp': 'https://web.whatsapp.com'}]}, {'🌀Twitter': 'https://www.twitter.com'}, {'🔻Youtube': 'https://www.youtube.com'}]}, {'📰News Sites': [{'Popular News Sites': ''}, {'🦊 FOX': 'https://www.foxnews.com'}, {'☕️ BBC': 'https://www.bbc.com/news'}, {'🏈 ESPN': 'https://www.espn.com/'}]}]}, {'Created By': [{'Yair Charit': [{'👨🏽\u200d💻 See some more of my work 👨🏽\u200d💻': ''}, {'*👓Portfolio': 'https://yaircharit.github.io'}, {'*💼LinkedIn': 'https://il.linkedin.com/in/yair-charit'}, {'*👷🏽\u200d♂️ Github': 'https://github.com/yaircharit'}]}]}]
+        // %INJECT BOOKMARKS HERE%
+        // document.staticMarks will be inserted above. the line below is only for testing purposes
+        // %INJECT NEWSFEED HERE%
     </script>
 </head>
 
@@ -138,8 +170,7 @@
     <div id="collections"></div>
 
     <script>
-        var collections_div = document.getElementById('collections')
-        let cl = new Collection('First')
+        let cc = new CollectionContainer(bookmarks, 'collections')
     </script>
     <!-- <div class="background"></div>
     <div id="topbar">
@@ -161,9 +192,7 @@
         </div> -->
 
         <!-- <script>
-            // %INJECT BOOKMARKS HERE%
-            // document.staticMarks will be inserted above. the line below is only for testing purposes
-            // %INJECT NEWSFEED HERE%
+            
 
 
             news_placeholder = document.getElementById('news_placeholder')
