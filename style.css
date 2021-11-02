@@ -4,17 +4,40 @@ input{
     background-color: transparent;
 }
 
-li{
-    
+ul{
+    padding-left: 20px;
+    padding-bottom: 10px;
+}
+
+ul.container-body> li.item, li.item-content{
+    list-style-type: none;
+}
+
+.clickable {
+    color: #455b97;
 }
 
 button{
     border-radius: 50px;
 }
 
+.little-button{
+    width: 1em;
+    height: 1em;
+    margin: 0%;
+    border:none;
+}
+
 .delete-button{
     background-color: maroon;
-    color: lightgray
+    color: lightgray;
+    text-align: center;
+}
+
+button.expand-button{
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48cGF0aCBkPSJNMTUxLjUgMzQ3LjhMMy41IDIwMWMtNC43LTQuNy00LjctMTIuMyAwLTE3bDE5LjgtMTkuOGM0LjctNC43IDEyLjMtNC43IDE3IDBMMTYwIDI4Mi43bDExOS43LTExOC41YzQuNy00LjcgMTIuMy00LjcgMTcgMGwxOS44IDE5LjhjNC43IDQuNyA0LjcgMTIuMyAwIDE3bC0xNDggMTQ2LjhjLTQuNyA0LjctMTIuMyA0LjctMTcgMHoiLz48L3N2Zz4=);
+    background-repeat: no-repeat;
+    background-color: transparent;
 }
 
 .collection{
@@ -38,16 +61,17 @@ button{
 }
 
 .container-head{
-    background-color: darkgray;
+    background-color: rgb(112, 112, 112);
     padding: 0.5em;
     border-bottom: rgb(97, 97, 97) 2px solid;
-    border-radius: 25px 25px 0 0;
+    border-radius: 10px 10px 0 0;
+    color: white;
     /* width: max-content; */
 }
 
 .container-body{
     background-color: lightgray;
-    border-radius: 0 0 25px 25px ;
+    border-radius: 0 0 10px 10px ;
     margin: 0;
     padding: 1em;
     /* width: max-content; */
