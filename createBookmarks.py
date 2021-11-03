@@ -20,7 +20,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "-template_file",
-    default="temp.html",
+    default="template.html",
     help='html template containing the string "var injected="%INJECTED%"',
 )
 parser.add_argument(
