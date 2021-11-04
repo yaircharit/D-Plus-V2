@@ -17,18 +17,16 @@
     <style>
         #collections{
             display: inline-flex;
-            flex-direction: row;
+            flex-direction: column;
             flex-wrap: wrap;
         }
 
         input {
             border: none;
             background-color: transparent;
-        }
-
-        ul {
-            padding-left: 20px;
-            padding-bottom: 10px;
+            font-family: 'Quattrocento Sans';
+            font-weight: 300;
+            
         }
 
         ul.container-body>li.item,
@@ -86,6 +84,8 @@
             border: none;
             font-size: 2rem;
             color: #222222;
+            height: fit-content;
+            border-bottom: #4d906b 1px dashed;
         }
 
         .collection-body{
@@ -94,18 +94,18 @@
             flex-wrap: wrap;
             width: 100%;
             justify-content: space-between;
+            margin-top: 1em;
         }
 
         .container {
-            margin: 1em;
+            margin:  0 2em;
             width: fit-content;
         }
 
         .container-head {
-            padding: 0.5em;
-            border: #a1a1a1 1px solid;
-            border-bottom: #222222 1px solid;
+            border-bottom: #222222 1px dashed;
             border-radius: 5px 5px 0 0;
+            width: fit-content;
         }
 
         .container-title {
@@ -116,13 +116,15 @@
         .item-title{
             font-size: 1.2rem;
             color: #888888;
+            font-style: italic;
         }
 
         .container-body {
             border-radius: 0 0 5px 5px;
             margin: 0;
-            padding: 1em;
-            border: #a1a1a1 1px solid;
+            /* padding: 1em; */
+            /* border: #a1a1a1 1px solid; */
+            border-top: none;
         }
 
         .clickable {
@@ -307,6 +309,7 @@
             toggleEditMode() {
                 for (let col in this.body) { toggleEditMode(this.body[col]); }
                 this.HTML.editButton.innerHTML = (this.HTML.editButton.innerHTML == 'Edit') ? 'Save' : 'Edit';
+                this.HTML.body.addButton.hidden = CollectionContainer.editMode
                 if (CollectionContainer.editMode) { bookmarks = this.JSON }
                 CollectionContainer.editMode = !CollectionContainer.editMode
             }
