@@ -7,7 +7,20 @@
     <meta name="viewport" content="height=device-height,initial-scale=1,shrink-to-fit=no" />
     <link rel="icon" href="https://cdn3.iconfinder.com/data/icons/movies-4/48/pokemon-movie-cinema-ball-512.png">
     <title>SQA Dashboard</title>
+    <link rel='stylesheet' href='css/woocommerce-layout.css' type='text/css' media='all' />
+	<link rel='stylesheet' href='css/woocommerce-smallscreen.css' type='text/css' media='only screen and (max-width: 768px)' />
+	<link rel='stylesheet' href='css/woocommerce.css' type='text/css' media='all' />
+	<link rel='stylesheet' href='css/font-awesome.min.css' type='text/css' media='all' />
+	<link rel='stylesheet' href='style.css' type='text/css' media='all' />
+	<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Oswald:400,500,700%7CRoboto:400,500,700%7Croboto:400,500,700%7CQuattrocento+Sans:400,500,700' type='text/css' media='all' />
+	<link rel='stylesheet' href='css/easy-responsive-shortcodes.css' type='text/css' media='all' />
     <style>
+        #collections{
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
         input {
             border: none;
             background-color: transparent;
@@ -23,74 +36,97 @@
             list-style-type: none;
         }
 
-        .clickable {
-            color: #455b97;
+        li.item::marker{
+            font-size: 13px;
+            color: rgb(54, 54, 54);
         }
+
+        
 
         button {
             border-radius: 50px;
+            text-align: center;
         }
 
         .little-button {
-            width: 1em;
-            height: 1em;
+            height: 10px;
+            width: 10px;
             margin: 0%;
+            padding: 0 0.3em;
             border: none;
+            border-radius: 50%;
+            color: lightgray;
         }
 
         .delete-button {
             background-color: maroon;
-            color: lightgray;
-            text-align: center;
+            
         }
 
         .add-button {
-            background-color: rgb(131, 180, 131);
-            color: lightgray;
-            text-align: center;
+            background-color: rgb(131, 180, 131);       
+            height: 2em;     
+            width: 2em;
         }
 
         button.expand-button {
             background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48cGF0aCBkPSJNMTUxLjUgMzQ3LjhMMy41IDIwMWMtNC43LTQuNy00LjctMTIuMyAwLTE3bDE5LjgtMTkuOGM0LjctNC43IDEyLjMtNC43IDE3IDBMMTYwIDI4Mi43bDExOS43LTExOC41YzQuNy00LjcgMTIuMy00LjcgMTcgMGwxOS44IDE5LjhjNC43IDQuNyA0LjcgMTIuMyAwIDE3bC0xNDggMTQ2LjhjLTQuNyA0LjctMTIuMyA0LjctMTcgMHoiLz48L3N2Zz4=);
             background-repeat: no-repeat;
             background-color: transparent;
+            float: right;
+            margin-top: 0.7rem;
         }
 
         .collection {
-            display: inline-flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-            /* background-color: goldenrod; */
+            width: 100%;
             padding: 2em;
         }
 
         .collection-title {
             border: none;
-            font-size: 2em;
+            font-size: 2rem;
+            color: #222222;
+        }
+
+        .collection-body{
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-between;
         }
 
         .container {
             margin: 1em;
             width: fit-content;
-            font-size: 0.3em;
-            /* border-radius: 25px; */
         }
 
         .container-head {
-            background-color: rgb(112, 112, 112);
             padding: 0.5em;
-            border-bottom: rgb(97, 97, 97) 2px solid;
-            border-radius: 10px 10px 0 0;
-            color: white;
-            /* width: max-content; */
+            border: #a1a1a1 1px solid;
+            border-bottom: #222222 1px solid;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .container-title {
+            font-size: 1.5rem;
+            color: #222222;
+        }
+
+        .item-title{
+            font-size: 1.2rem;
+            color: #888888;
         }
 
         .container-body {
-            background-color: lightgray;
-            border-radius: 0 0 10px 10px;
+            border-radius: 0 0 5px 5px;
             margin: 0;
             padding: 1em;
-            /* width: max-content; */
+            border: #a1a1a1 1px solid;
+        }
+
+        .clickable {
+            color: #455b97;
         }
     </style>
     <script>
@@ -182,6 +218,8 @@
                 obj.HTML.head.expandButton.hidden = !CollectionContainer.editMode && obj.body.length == 0;
                 obj.HTML.head.expandButton.onclick = () => { obj.toggleExpand() }
                 obj.HTML.head.title.onclick = () => { obj.titleClicked(); }
+                if (obj.url != '')
+                    obj.HTML.head.title.classList.add('clickable')
             }
 
             for (let name in obj.HTML.head)
@@ -200,7 +238,6 @@
                 obj.url = Object.values(json_obj)[0]
                 if (obj.url instanceof Array)
                     obj.url = obj.url[0]
-                console.log(obj.url)
                 obj.HTML.body.url = createElement('input', { class: 'item-url', value: obj.url, readonly: true, hidden: true },)
                 obj.HTML.body.main.hidden = true
                 obj.HTML.body.main.appendChild(createElement('li', { class: 'item-content' }, obj.HTML.body.url))
@@ -239,9 +276,9 @@
             obj.HTML.body.addButton.hidden = CollectionContainer.editMode
             if (CollectionContainer.editMode)
                 obj.title = obj.HTML.head.title.value
-            
+
             if (obj.constructor.name == 'Item') {
-                obj.HTML.head.expandButton.hidden = CollectionContainer.editMode
+                obj.HTML.head.expandButton.hidden = CollectionContainer.editMode && obj.body.length == 0;
                 if (CollectionContainer.editMode)
                     obj.url = obj.HTML.body.url.value
                 obj.HTML.body.url.hidden = CollectionContainer.editMode
@@ -255,7 +292,7 @@
             constructor(json_colls = [{ 'New Collection': [] }], main_HTML_ID = 'collections', edit_button_ID = 'edit-button') {
                 CollectionContainer.editMode = false;
                 this.body = []
-                this.HTML = {body: {}}
+                this.HTML = { body: {} }
                 this.HTML.body.main = document.getElementById(main_HTML_ID)
                 this.HTML.editButton = document.getElementById(edit_button_ID)
 
@@ -278,8 +315,8 @@
                 let fullHTML = document.documentElement.innerHTML
                 let head = fullHTML.substr(0, fullHTML.search('<bo' + 'dy>'))
                 head = head.replace(/\s*var bookmarks = \[.*\n/g, '\n\t\tvar ' + `bookmarks = ${JSON.stringify(this.JSON)}\n`)
-                console.log(head)
-                let body = '<bo' + 'dy><div id="collections"></div>'
+                let header = '<header id="masthead" class="site-header"><div class="site-branding"><h1 class="site-title"><a href="home.html" rel="home">SQA</a></h1><h3 class="site-description">SQA Knowledge Dashboard</br><sup><font color="#7B7B7B" style="font-size:110%;">For Internal Use Only &copy;</font></sup></h3></div><nav id="site-navigation" class="main-navigation"><button class="menu-toggle">Menu</button><a class="skip-link screen-reader-text" href="#content">Skip to content</a><div class="menu-menu-1-container"><ul id="menu-menu-1" class="menu"><li><a href="sqa_school.html">SQA School</a></li><li><a href="SQA_Basics.html">SQA Basics</a></li><li><a href="sw_school.html">SW SCHOOL</a></li><li><a href="BW1.html">BW1</a></li><li><a href="Carto_V7.html">Carto V7</a></li><li><a href="Carto_V8.html">Carto V7.5</a></li><li><a href="nGEN.html">nGEN</a></li><!--<li><a href="trudi.html">Trudi</a></li>--><li><a target="blank" href="bookmarks.html"></a><font color="#7B7B7B">SQA Dashboard</font></a></li></ul></div></nav></header>'
+                let body = '<bo' + 'dy>'+header+'<div id="newsFeed" class="wpcmsdev-tabs"><div id="collections"></div>'
                 let footer = fullHTML.substr(fullHTML.search('<foo' + 'ter>')) + ''
                 let res = `<!DOCTYPE html><html lang="en">${head}${body}${footer}</html>`
 
@@ -367,6 +404,41 @@
 </head>
 
 <body>
+    <header id="masthead" class="site-header">
+        <div class="site-branding">
+            <h1 class="site-title"><a href="home.html" rel="home">SQA</a></h1>
+            <h3 class="site-description">SQA Knowledge Dashboard</br><sup>
+                    <font color="#7B7B7B" style="font-size:110%;">For Internal Use Only &copy;</font>
+                </sup></h3>
+        </div>
+        <nav id="site-navigation" class="main-navigation">
+            <button class="menu-toggle">Menu</button>
+            <a class="skip-link screen-reader-text" href="#content">Skip to content</a>
+            <div class="menu-menu-1-container">
+                <ul id="menu-menu-1" class="menu">
+                    <li><a href="sqa_school.html">SQA School</a></li>
+                    <li><a href="SQA_Basics.html">SQA Basics</a></li>
+                    <li><a href="sw_school.html">SW SCHOOL</a></li>
+                    <li><a href="BW1.html">BW1</a></li>
+                    <li><a href="Carto_V7.html">Carto V7</a></li>
+                    <li><a href="Carto_V8.html">Carto V7.5</a></li>
+                    <li><a href="nGEN.html">nGEN</a></li>
+                    <!--<li><a href="trudi.html">Trudi</a></li>-->
+                    <li><a target="blank" href="bookmarks.html"></a><font color="#7B7B7B">SQA Dashboard</font></a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div id='newsFeed' class="wpcmsdev-tabs">
+        <div class="tab">
+            <h3 class="tab-title" data-tab-id="news1">News Flash!</h3>
+            <div id="news1" class="tab-content">
+                <p>
+                    No one is wearing pants!
+                </p>
+            </div>
+        </div>
+    </div>
     <div id="collections"></div>
     <footer>
         <div style="float:right; flex-direction: column; ">
@@ -377,6 +449,15 @@
     <script>
         let cc = new CollectionContainer(bookmarks, 'collections')
     </script>
+
+    <!-- #page -->
+	<script src='js/jquery.js'></script>
+	<script src='js/plugins.js'></script>
+	<script src='js/scripts.js'></script>
+	<script src='js/accordion.js'></script>
+	<script src='js/tabs.js'></script>
+	<script src='js/toggle.js'></script>
+	<script src='js/masonry.pkgd.min.js'></script>
 </body>
 
 </html>
