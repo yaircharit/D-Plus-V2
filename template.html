@@ -141,35 +141,136 @@
             for (var i in e) input_element.addEventListener(e[i], fitSize, false);
         }
 
+        function add(obj, json_obj = undefined) {
+            let func = ((obj instanceof CollectionContainer) ? ((obj, json) => { return new Collection(obj, json) }) : ((obj instanceof Collection) ? (obj, json) => { return new Container(obj, json) } : (obj, json) => { return new Item(obj, json) }))
+            let temp = (json_obj != undefined) ? func(obj, json_obj) : func(obj)
+            obj.body.push(temp)
+            obj.HTML.body.main.appendChild(temp.HTML.main)
+        }
+
+        function remove(obj) {
+            obj.parent.body = obj.parent.body.filter((el) => { return el != obj })
+            obj.parent.HTML.body.main.removeChild(obj.HTML.main)
+            delete obj
+        }
+        function generateAddButton(obj) {
+            obj.HTML.body.addButton = createElement('button', { class: 'little-button add-button', hidden: true }, '+')
+            obj.HTML.body.addButton.onclick = () => {
+                obj.HTML.body.main.removeChild(obj.HTML.body.center)
+                add(obj)
+                obj.HTML.body.main.appendChild(obj.HTML.body.center)
+            }
+            obj.HTML.body.addButton.hidden = !CollectionContainer.editMode
+            obj.HTML.body.center = createElement('center', {}, obj.HTML.body.addButton)
+            obj.HTML.body.main.appendChild(obj.HTML.body.center)
+        }
+
+        function generateHead(obj) {
+            obj.HTML.head = {}
+            let obj_type = obj.constructor.name.toLowerCase()
+            obj.HTML.head.main = createElement('div', { class: obj_type + '-head' })
+
+            obj.HTML.head.deleteButton = createElement('button', { class: 'little-button delete-button', hidden: true })
+            obj.HTML.head.deleteButton.onclick = () => { remove(obj) }
+            obj.HTML.head.deleteButton.hidden = !CollectionContainer.editMode;
+
+            obj.HTML.head.title = createElement('input', { class: obj_type + '-title', value: obj.title, readonly: true },)
+            obj.HTML.head.title.readOnly = !CollectionContainer.editMode;
+
+            if (obj_type == 'item') {
+                obj.HTML.head.expandButton = createElement('button', { class: 'little-button expand-button' })
+                obj.HTML.head.expandButton.hidden = !CollectionContainer.editMode && obj.body.length == 0;
+                obj.HTML.head.expandButton.onclick = () => { obj.toggleExpand() }
+                obj.HTML.head.title.onclick = () => { obj.titleClicked(); }
+            }
+
+            for (let name in obj.HTML.head)
+                if (name != 'main')
+                    obj.HTML.head.main.appendChild(obj.HTML.head[name])
+        }
+
+        function generateBody(obj, json_obj) {
+            obj.HTML.body = {}
+            obj.body = []
+            let obj_type = obj.constructor.name.toLowerCase()
+            let elem_type = (obj_type == 'collection') ? 'div' : 'ul'
+
+            obj.HTML.body.main = createElement(elem_type, { class: obj_type + '-body' })
+            if (obj_type == 'item') {
+                obj.url = Object.values(json_obj)[0]
+                if (obj.url instanceof Array)
+                    obj.url = obj.url[0]
+                console.log(obj.url)
+                obj.HTML.body.url = createElement('input', { class: 'item-url', value: obj.url, readonly: true, hidden: true },)
+                obj.HTML.body.main.hidden = true
+                obj.HTML.body.main.appendChild(createElement('li', { class: 'item-content' }, obj.HTML.body.url))
+            }
+            json_obj = json_obj[obj.title]
+            for (let i in json_obj) {
+                if (json_obj[i] instanceof Object) {
+                    add(obj, json_obj[i])
+                }
+            }
+            generateAddButton(obj)
+        }
+
+        function generateHTML(obj, json) {
+            obj.HTML = {}
+            let obj_type = obj.constructor.name.toLowerCase()
+            let elem_type = (obj_type == 'item') ? 'li' : 'div'
+            obj.title = Object.keys(json)[0]
+            if (obj.title.startsWith('*')) {
+                obj.immutable = true
+                obj.title = obj.title.substr(1)
+            } else obj.immutable = false;
+
+            obj.HTML.main = createElement(elem_type, { class: obj_type })
+
+            generateBody(obj, json)
+            generateHead(obj)
+
+            obj.HTML.main.appendChild(obj.HTML.head.main)
+            obj.HTML.main.appendChild(obj.HTML.body.main)
+        }
+
+        function toggleEditMode(obj) {
+            obj.HTML.head.deleteButton.hidden = CollectionContainer.editMode
+            obj.HTML.head.title.readOnly = CollectionContainer.editMode
+            obj.HTML.body.addButton.hidden = CollectionContainer.editMode
+            if (CollectionContainer.editMode)
+                obj.title = obj.HTML.head.title.value
+            
+            if (obj.constructor.name == 'Item') {
+                obj.HTML.head.expandButton.hidden = CollectionContainer.editMode
+                if (CollectionContainer.editMode)
+                    obj.url = obj.HTML.body.url.value
+                obj.HTML.body.url.hidden = CollectionContainer.editMode
+                obj.HTML.body.url.readOnly = CollectionContainer.editMode
+            }
+
+            for (let i in obj.body) { toggleEditMode(obj.body[i]) }
+        }
+
         class CollectionContainer {
             constructor(json_colls = [{ 'New Collection': [] }], main_HTML_ID = 'collections', edit_button_ID = 'edit-button') {
                 CollectionContainer.editMode = false;
                 this.body = []
-                this.HTML = document.getElementById(main_HTML_ID)
-                this.editButton = document.getElementById(edit_button_ID)
-                let coll;
+                this.HTML = {body: {}}
+                this.HTML.body.main = document.getElementById(main_HTML_ID)
+                this.HTML.editButton = document.getElementById(edit_button_ID)
+
                 for (let i in json_colls) {
-                    this.add(json_colls[i])
+                    add(this, json_colls[i])
                 }
 
-                this.editButton.onclick = () => { this.toggleEditMode() }
-                this['add-button'] = createElement('button', {class: 'little-button add-button', hidden:true}, '+')
-                this['add-button'].onclick = ()=>{this.add()}
-                this['add-button'].hidden = !CollectionContainer.editMode
-                this.HTML.appendChild(createElement( 'center',{},this['add-button']))
+                this.HTML.editButton.onclick = () => { this.toggleEditMode() }
+                generateAddButton(this)
             }
 
             toggleEditMode() {
-                let temp;
-                for (let col in this.body) {
-                    this.body[col].toggleEditMode();
-                }
-                this['add-button'].hidden = CollectionContainer.editMode
-                this.editButton.innerHTML = (this.editButton.innerHTML == 'Edit') ? 'Save' : 'Edit';
-                if (CollectionContainer.editMode) {
-                    bookmarks = this.JSON
-                    // console.log(bookmarks)
-                }
+                for (let col in this.body) { toggleEditMode(this.body[col]); }
+                this.HTML.editButton.innerHTML = (this.HTML.editButton.innerHTML == 'Edit') ? 'Save' : 'Edit';
+                if (CollectionContainer.editMode) { bookmarks = this.JSON }
                 CollectionContainer.editMode = !CollectionContainer.editMode
             }
 
@@ -188,17 +289,6 @@
                 element.click();
             }
 
-            add(json_coll = { ' New Collection': [] }) {
-                let coll = new Collection(this, json_coll)
-                this.body.push(coll)
-                this.HTML.appendChild(coll.HTML.main)
-            }
-
-            remove(coll) {
-                this.body = this.body.filter((el) => { return el != coll })
-                this.HTML.removeChild(coll.HTML.main)
-            }
-
             get JSON() {
                 let temp = []
                 for (let i in this.body) temp.push(this.body[i].JSON)
@@ -210,57 +300,7 @@
         class Collection {
             constructor(parent, json_coll = { 'New Collection': [] }) {
                 this.parent = parent
-                this.title = Object.keys(json_coll)[0];
-                json_coll = json_coll[this.title]
-                this.body = []
-                this.HTML = {}
-                this.HTML.main = createElement('div', { class: 'collection' })
-                this.HTML.head = {}
-                this.HTML.head.main = createElement('div', { class: 'collection-head' })
-                this.HTML.head['delete-button'] = createElement('button', { class: 'little-button delete-button', hidden: true })
-                this.HTML.head.title = createElement('input', { class: 'collection-title', value: this.title, readonly: true },)
-                this.HTML.head['delete-button'].onclick = () => { this.parent.remove(this) }
-
-                for (let name in this.HTML.head)
-                    if (name != 'main')
-                        this.HTML.head.main.appendChild(this.HTML.head[name])
-
-                this.HTML.main.appendChild(this.HTML.head.main)
-
-                this.HTML.body = createElement('div', { class: 'collection-body' })
-                this.HTML.main.appendChild(this.HTML.body)
-
-                let json_cont;
-                for (let i in json_coll) {
-                    json_cont = json_coll[i]
-                    this.add(json_cont)
-                }
-
-                this.HTML['add-button'] = createElement('button', {class: 'little-button add-button', hidden:true}, '+')
-                this.HTML['add-button'].onclick = ()=>{this.add()}
-                this.HTML['add-button'].hidden = !CollectionContainer.editMode
-                this.HTML.main.appendChild(createElement( 'center',{},this.HTML['add-button']))
-            }
-
-            add(json_cont) {
-                let cont = new Container(this, json_cont)
-                this.body.push(cont)
-                this.HTML.body.appendChild(cont.HTML.main)
-            }
-
-            toggleEditMode() {
-                this.HTML.head['delete-button'].hidden = CollectionContainer.editMode
-                this.HTML.head.title.readOnly = CollectionContainer.editMode
-                this.HTML['add-button'].hidden = CollectionContainer.editMode
-                if (CollectionContainer.editMode) {
-                    this.title = this.HTML.head.title.value
-                }
-                for (let i in this.body) { this.body[i].toggleEditMode() }
-            }
-
-            remove(cont) {
-                this.body = this.body.filter((el) => { return el != cont })
-                this.HTML.body.removeChild(cont.HTML.main)
+                generateHTML(this, json_coll)
             }
 
             get JSON() {
@@ -274,59 +314,7 @@
         class Container {
             constructor(parent, json_cont = { 'New Container': '' }) {
                 this.parent = parent
-                this.title = Object.keys(json_cont)[0]
-                json_cont = json_cont[this.title]
-                this.body = []
-                this.HTML = {}
-                this.HTML.main = createElement('div', { class: 'container' })
-                this.HTML.head = {}
-                this.HTML.head.main = createElement('div', { class: 'container-head' })
-
-                this.HTML.head['delete-button'] = createElement('button', { class: 'little-button delete-button', hidden: true })
-                this.HTML.head['delete-button'].onclick = () => { this.parent.remove(this) }
-                this.HTML.head.title = createElement('input', { class: 'container-title', value: this.title, readonly: true },)
-                this.HTML.head['delete-button'].hidden = !CollectionContainer.editMode;
-                this.HTML.head.title.readOnly = !CollectionContainer.editMode;
-                for (let name in this.HTML.head)
-                    if (name != 'main')
-                        this.HTML.head.main.appendChild(this.HTML.head[name])
-
-                this.HTML.main.appendChild(this.HTML.head.main)
-
-                this.HTML.body = createElement('ul', { class: 'container-body' })
-                this.HTML.main.appendChild(this.HTML.body)
-
-                let json_item;
-                for (let i in json_cont) {
-                    json_item = json_cont[i]
-                    this.add(json_item)
-                }
-
-                this.HTML['add-button'] = createElement('button', {class: 'little-button add-button', hidden:true}, '+')
-                this.HTML['add-button'].hidden = !CollectionContainer.editMode
-                this.HTML['add-button'].onclick = ()=>{this.add()}
-                this.HTML.main.appendChild(createElement( 'center',{},this.HTML['add-button']))
-            }
-
-            add(json_item = { 'New Item': ['Empty URL'] }) {
-                let item = new Item(this, json_item)
-                this.body.push(item)
-                this.HTML.body.appendChild(item.HTML.main)
-            }
-
-            toggleEditMode() {
-                this.HTML.head['delete-button'].hidden = CollectionContainer.editMode
-                this.HTML.head.title.readOnly = CollectionContainer.editMode
-                this.HTML['add-button'].hidden = CollectionContainer.editMode
-                if (CollectionContainer.editMode) {
-                    this.title = this.HTML.head.title.value
-                }
-                for (let i in this.body) { this.body[i].toggleEditMode() }
-            }
-
-            remove(item) {
-                this.body = this.body.filter((el) => { return el != item })
-                this.HTML.body.removeChild(item.HTML.main)
+                generateHTML(this, json_cont)
             }
 
             get JSON() {
@@ -338,95 +326,23 @@
         }
 
         class Item {
-            constructor(parent, json_item = { 'New Item': ['Empty URL'] }, depth = 0, expanded = false) {
+            constructor(parent, json_item = { 'New Item': ['Empty URL'] }) {
                 this.parent = parent;
-                this.title = Object.keys(json_item)[0]
-                json_item = json_item[this.title]
-                this.depth = depth
-                this.expanded = expanded;
-                if (this.title.startsWith('*')) {
-                    this.immutable = true
-                    this.title = this.title.substr(1)
-                } else this.immutable = false;
-                if (!(json_item instanceof Array))
-                    json_item = [json_item]
-                this.url = (json_item[0] instanceof String) ? json_item[0] : ''
-                this.body = []
-
-                this.HTML = {}
-                this.HTML.main = createElement('li', { class: 'item' })
-
-                this.HTML.head = {
-                    main: createElement('div', { class: 'item-head' }),
-                    'delete-button': createElement('button', { class: 'little-button delete-button' }),
-                    title: createElement('input', { class: `item-title ${(this.url != '') ? 'clickable' : ''}`, value: this.title},),
-                    'expand-button': createElement('button', { class: 'little-button expand-button' })
-                }
-                this.HTML.head['delete-button'].hidden = !CollectionContainer.editMode;
-                this.HTML.head['expand-button'].hidden = !CollectionContainer.editMode;
-                this.HTML.head.title.readOnly = !CollectionContainer.editMode;
-                this.HTML.head['expand-button'].onclick = () => { this.toggleExpand() }
-                this.HTML.head['delete-button'].onclick = () => { this.parent.remove(this) }
-                this.HTML.head.title.onclick = () => { this.titleClicked() }
-
-                for (let name in this.HTML.head)
-                    if (name != 'main')
-                        this.HTML.head.main.appendChild(this.HTML.head[name])
-                this.HTML.main.appendChild(this.HTML.head.main)
-
-                this.HTML.body = {
-                    main: createElement('ul', { class: 'item-body', hidden: true }),
-                    url: createElement('input', { class: 'item-url', value: this.url, readonly: true, hidden: true },),
-                }
-                this.HTML.body.main.appendChild(createElement('li', { class: 'item-content' }, this.HTML.body.url))
-                this.HTML.main.appendChild(this.HTML.body.main)
-
-                let item;
-                for (let i in json_item) {
-                    if (json_item[i] instanceof Object) {
-                        this.HTML.head['expand-button'].hidden = false
-                        this.add(json_item[i])
-                    }
-                }
-
-                this.HTML['add-button'] = createElement('button', {class: 'little-button add-button', hidden:true}, '+')
-                this.HTML['add-button'].onclick = ()=>{this.add()}
-                this.HTML.main.appendChild(createElement( 'center',{},this.HTML['add-button']))
-            }
-
-            add(json_item = { 'New Item': ['Empty URL'] }) {
-                var item = new Item(this, json_item, this.depth + 1)
-                this.body.push(item)
-                this.HTML.body.main.appendChild(item.HTML.main)
-            }
-
-            toggleEditMode() {
-                if (this.body.length == 0)
-                    this.HTML.head['expand-button'].hidden = CollectionContainer.editMode
-
-                this.HTML.head.title.readOnly = CollectionContainer.editMode
-                this.HTML.body.url.hidden = CollectionContainer.editMode
-                this.HTML.body.url.readOnly = CollectionContainer.editMode
-                this.HTML.head['delete-button'].hidden = CollectionContainer.editMode
-                this.HTML['add-button'].hidden = CollectionContainer.editMode || !this.expanded
-                if (CollectionContainer.editMode) {
-                    this.title = this.HTML.head.title.value
-                    this.url = this.HTML.body.url.value
-                }
-                for (let i in this.body) { this.body[i].toggleEditMode() }
+                this.expanded = false;
+                generateHTML(this, json_item)
             }
 
             toggleExpand() {
                 this.HTML.body.main.hidden = this.expanded
                 this.expanded = !this.expanded
-                console.log(`${this.expanded} && ${CollectionContainer.editMode} = ${this.expanded && CollectionContainer.editMode}` )
-                this.HTML['add-button'].hidden = !(this.expanded && CollectionContainer.editMode)
+                this.HTML.body.addButton.hidden = !(this.expanded && CollectionContainer.editMode)
             }
 
             static webFileTypesRegEx = '(https://|https:\\\\|https://|http:\\\\).*|.*(\.pdf)'
             titleClicked() {
                 let dir = this.url
-                if (CollectionContainer.editMode && this.url != '') {
+                if (!CollectionContainer.editMode && this.url != '') {
+                    console.log(this)
                     if (this.url.match(Item.webFileTypesRegEx)) {
                         window.open(this.url, '_blank')
                     } else {
@@ -439,16 +355,10 @@
                 }
             }
 
-            remove(item) {
-                this.body = this.body.filter((el) => { return el != item })
-                this.HTML.body.main.removeChild(item.HTML.main)
-            }
-
             get JSON() {
                 let temp = {}
                 temp[`${this.title}`] = [this.url]
-                for (let i in this.body)
-                    temp[`${this.title}`].push(this.body[i].JSON)
+                for (let i in this.body) temp[`${this.title}`].push(this.body[i].JSON)
                 return temp;
             }
         }
