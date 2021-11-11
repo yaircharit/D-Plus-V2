@@ -602,6 +602,10 @@
             }
 
             get JSON() {
+                this.title = this.HTML.title.value
+                this.body = this.HTML.content.value
+                this.startsAt = new Date(this.HTML.start.value)
+                this.endsAt = this.HTML.end.value
                 return {
                     title: this.title,
                     content: this.body,
