@@ -76,7 +76,25 @@
             float: right;
             margin-top: 0.7rem;
         }
+        div#buttons{
+            position: fixed;
+            right: 0;
+            bottom: 0;
+        }
 
+        button#god-mode-button{
+            left: 0;
+            bottom: 0;
+            padding: 1.5vw;
+            background-color: transparent;
+            position: fixed;
+            border: none;
+            border-radius: 0;
+
+        }
+        button#god-mode-button:hover{
+            background-color: wheat;
+        }
         .collection {
             width: 100%;
             padding: 2em;
@@ -597,8 +615,12 @@
         function editButtonClick(coll_container, news) {
             editMode = !editMode
             news.toggleEditMode()
-            editButton.innerHTML = (editButton.innerHTML == 'Edit') ? 'Save' : 'Edit';
             coll_container.toggleEditMode()
+            editButton.innerHTML = (editMode) ? 'Save' : 'Edit';
+        }
+
+        function godButtonClick(){
+            buttonsDiv.style.display = (buttonDiv.style.display == 'none')? 'block': 'none';
         }
 
         function dateToString(dateObj) {
@@ -642,13 +664,16 @@
     </div>
     <div id="collections"></div>
     <footer>
-        <div style="float:right; flex-direction: column; ">
+        <div id="buttons" style="display: none; float:right; flex-direction: column; ">
             <button id='edit-button' class="intButton editButton" onclick="editButtonClick(cc,newsObj)">Edit</button>
             <button id="download-button" class="intButton saveButton" onclick="bookmarks = cc.JSON; news = newsObj.JSON; download()">Download</button></a>
         </div>
+        <button id='god-mode-button' onclick='buttonsDiv.style.display = (document.getElementById("buttons").style.display == "none")? "block": "none";'></button>
     </footer>
     <script>
+        var buttonsDiv = document.getElementById('buttons')
         var editButton = document.getElementById('edit-button')
+        var downloadButton = document.getElementById('download-button')
         let cc = new CollectionContainer(bookmarks, 'collections')
         let newsObj = new NewsFeed('news')
     </script>
